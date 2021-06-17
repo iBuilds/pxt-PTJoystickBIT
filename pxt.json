@@ -1,6 +1,6 @@
 {
-    "name": "pxt-ptjoystickbit",
-    "version": "0.0.0",
+    "name": "pxt-PTKidsBIT-Robot",
+    "version": "1.1.2",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -9,8 +9,7 @@
     },
     "files": [
         "README.md",
-        "main.blocks",
-        "main.ts"
+        "PTKidsBITRobot.ts"
     ],
     "testFiles": [
         "test.ts"
@@ -19,5 +18,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
