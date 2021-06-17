@@ -113,7 +113,7 @@ enum Axis {
     Y
 }
 
-//% color="#2ECC71" icon="\uf11b"
+//% color="#2ECC89" icon="\uf11b"
 namespace PTJoystickBIT {
     /**
      * Read Analog from ADC Channel
