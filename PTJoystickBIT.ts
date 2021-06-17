@@ -620,6 +620,15 @@ namespace PTJoystickBIT {
 
     //% group="Motion Sensor"
     /**
+    * Get shake gesture value
+    */
+    //% block="on gesture shake"
+    export function shakeGesture(): boolean {
+        return (input.isGesture(Gesture.Shake) ? true : false)
+    }
+
+    //% group="Motion Sensor"
+    /**
      * Read acceleration value from jostick
      */
     //% block="acceleration of axis %Axis"
