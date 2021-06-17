@@ -5,67 +5,32 @@
  * generated for an **exported** function.
  */
 
-let Sensor_All_PIN = [0, 1, 2, 3, 4, 5]
-let Sensor_PIN = [1, 2, 3, 4]
-let Sensor_Left = [0]
-let Sensor_Right = [5]
-let Num_Sensor = 4
-let LED_PIN = 0
-
-let Line_LOW = [0, 0, 0, 0, 0, 0, 0, 0]
-let Line_HIGH = [0, 0, 0, 0, 0, 0, 0, 0]
-let Color_Line_All: number[] = []
-let Color_Background_All: number[] = []
-let Color_Line: number[] = []
-let Color_Background: number[] = []
-let Color_Line_Left: number[] = []
-let Color_Background_Left: number[] = []
-let Color_Line_Right: number[] = []
-let Color_Background_Right: number[] = []
-let Line_Mode = 0
-let Last_Position = 0
-let error = 0
-let P = 0
-let D = 0
-let previous_error = 0
-let PD_Value = 0
-let left_motor_speed = 0
-let right_motor_speed = 0
-
-enum Motor_Write {
-    //% block="Left"
-    Motor_Left,
-    //% block="Right"
-    Motor_Right
-}
-
-enum _Turn {
-    //% block="Left"
-    Left,
-    //% block="Right"
-    Right
-}
-
-enum _Spin {
-    //% block="Left"
-    Left,
-    //% block="Right"
-    Right
-}
-
-enum Servo_Write {
-    //% block="P8"
-    P8,
-    //% block="P12"
-    P12
-}
-
-enum Button_Status {
-    //% block="Pressed"
-    Pressed,
-    //% block="Released"
-    Released
-}
+let VB_Button = 0
+let LEFT_Button = 0
+let DOWN_Button = 0
+let UP_Button = 0
+let HOME_Button = 0
+let Serial_String: string[] = []
+let Auto_Power_Off = true
+let State_Button_L1 = false
+let State_Button_ZL = false
+let State_Button_R1 = false
+let State_Button_ZR = false
+let State_Button_UP = false
+let State_Button_DOWN = false
+let State_Button_LEFT = false
+let State_Button_RIGHT = false
+let State_Button_X = false
+let State_Button_Y = false
+let State_Button_A = false
+let State_Button_B = false
+let State_Button_SEL = false
+let State_Button_STA = false
+let State_Button_TUB = false
+let State_Button_VB = false
+let State_Button_HOME = false
+let State_Button_LEFT_HAT = false
+let State_Button_RIGHT_HAT = false
 
 enum ADC_Read {
     //% block="0"
@@ -86,659 +51,618 @@ enum ADC_Read {
     ADC7 = 0xF4
 }
 
-enum Forward_Direction {
-    //% block="Forward"
-    Forward,
-    //% block="Backward"
-    Backward
+enum Button_PIN {
+    //% block="L1"
+    L1,
+    //% block="ZL"
+    ZL,
+    //% block="R1"
+    R1,
+    //% block="ZR"
+    ZR,
+    //% block="UP"
+    UP,
+    //% block="DOWN"
+    DOWN,
+    //% block="LEFT"
+    LEFT,
+    //% block="RIGHT"
+    RIGHT,
+    //% block="X"
+    X,
+    //% block="Y"
+    Y,
+    //% block="A"
+    A,
+    //% block="B"
+    B,
+    //% block="SEL-"
+    SEL,
+    //% block="STA+"
+    STA,
+    //% block="TUB"
+    TUB,
+    //% block="VB"
+    VB,
+    //% block="HOME"
+    HOME,
+    //% block="LEFT HAT"
+    LEFT_HAT,
+    //% block="RIGHT HAT"
+    RIGHT_HAT
 }
 
-enum Find_Line {
-    //% block="Left"
-    Left,
-    //% block="Center"
-    Center,
-    //% block="Right"
-    Right
+enum Button_Type {
+    //% block="clicked"
+    clicked,
+    //% block="released"
+    released
 }
 
-enum Turn_Line {
-    //% block="Left"
-    Left,
-    //% block="Right"
-    Right
+enum Analog_Hat {
+    //% block="LEFT"
+    left,
+    //% block="RIGHT"
+    right
 }
 
-//% color="#2ECC71" icon="\u2B99"
-namespace PTKidsBITRobot {
-	//% group="Motor Control"
-    /**
-     * Stop all Motor
-     */
-    //% block="Motor Stop"
-    export function motorStop():void {
-        pins.digitalWritePin(DigitalPin.P13, 1)
-        pins.analogWritePin(AnalogPin.P14, 0)
-        pins.digitalWritePin(DigitalPin.P15, 1)
-        pins.analogWritePin(AnalogPin.P16, 0)
-    }
+enum Axis {
+    //% block="X"
+    X,
+    //% block="Y"
+    Y
+}
 
-    //% group="Motor Control"
-    /**
-     * Spin the Robot to Left or Right. The speed motor is adjustable between 0 to 100.
-     */
-    //% block="Spin %_Spin|Speed %Speed"
-    //% speed.min=0 speed.max=100
-    export function Spin(spin: _Spin, speed: number): void {
-        speed = pins.map(speed, 0, 100, 0, 1023)
-        
-        if (spin == _Spin.Left) {
-            pins.digitalWritePin(DigitalPin.P13, 1)
-            pins.analogWritePin(AnalogPin.P14, speed)
-            pins.digitalWritePin(DigitalPin.P15, 0)
-            pins.analogWritePin(AnalogPin.P16, speed)
-        }
-        else if (spin == _Spin.Right) {
-            pins.digitalWritePin(DigitalPin.P13, 0)
-            pins.analogWritePin(AnalogPin.P14, speed)
-            pins.digitalWritePin(DigitalPin.P15, 1)
-            pins.analogWritePin(AnalogPin.P16, speed)
-        }
-    }
-
-    //% group="Motor Control"
-    /**
-     * Turn the Robot to Left or Right. The speed motor is adjustable between 0 to 100.
-     */
-    //% block="Turn %_Turn|Speed %Speed"
-    //% speed.min=0 speed.max=100
-    export function Turn(turn: _Turn, speed: number): void {
-        speed = pins.map(speed, 0, 100, 0, 1023)
-
-        if (turn == _Turn.Left) {
-            pins.digitalWritePin(DigitalPin.P13, 1)
-            pins.analogWritePin(AnalogPin.P14, 0)
-            pins.digitalWritePin(DigitalPin.P15, 0)
-            pins.analogWritePin(AnalogPin.P16, speed)
-        }
-        else if (turn == _Turn.Right) {
-            pins.digitalWritePin(DigitalPin.P13, 0)
-            pins.analogWritePin(AnalogPin.P14, speed)
-            pins.digitalWritePin(DigitalPin.P15, 1)
-            pins.analogWritePin(AnalogPin.P16, 0)
-        }
-    }
-
-    //% group="Motor Control"
-    /**
-     * Control motors speed both at the same time. The speed motors is adjustable between -100 to 100.
-     */
-    //% block="Motor Left %Motor_Left|Motor Right %Motor_Right"
-    //% speed1.min=-100 speed1.max=100
-    //% speed2.min=-100 speed2.max=100
-    export function motorGo(speed1: number, speed2: number): void {
-        speed1 = pins.map(speed1, -100, 100, -1023, 1023)
-        speed2 = pins.map(speed2, -100, 100, -1023, 1023)
-
-        if (speed1 < 0) {
-            pins.digitalWritePin(DigitalPin.P13, 1)
-            pins.analogWritePin(AnalogPin.P14, -speed1)
-        }
-        else if (speed1 >= 0) {
-            pins.digitalWritePin(DigitalPin.P13, 0)
-            pins.analogWritePin(AnalogPin.P14, speed1)
-        }
-
-        if (speed2 < 0) {
-            pins.digitalWritePin(DigitalPin.P15, 1)
-            pins.analogWritePin(AnalogPin.P16, -speed2)
-        }
-        else if (speed2 >= 0) {
-            pins.digitalWritePin(DigitalPin.P15, 0)
-            pins.analogWritePin(AnalogPin.P16, speed2)
-        }
-    }
-
-    //% group="Motor Control"
-    /**
-     * Control motor speed 1 channel. The speed motor is adjustable between -100 to 100.
-     */
-    //% block="motorWrite %Motor_Write|Speed %Speed"
-    //% speed.min=-100 speed.max=100
-    export function motorWrite(motor: Motor_Write, speed: number): void {
-        speed = pins.map(speed, -100, 100, -1023, 1023)
-        
-        if (motor == Motor_Write.Motor_Left) {
-            if (speed < 0) {
-                pins.digitalWritePin(DigitalPin.P13, 1)
-                pins.analogWritePin(AnalogPin.P14, -speed)
-            }
-            else if (speed >= 0) {
-                pins.digitalWritePin(DigitalPin.P13, 0)
-                pins.analogWritePin(AnalogPin.P14, speed)
-            }
-        }
-        else if (motor == Motor_Write.Motor_Right) {
-            if (speed < 0) {
-                pins.digitalWritePin(DigitalPin.P15, 1)
-                pins.analogWritePin(AnalogPin.P16, -speed)
-            }
-            else if (speed >= 0) {
-                pins.digitalWritePin(DigitalPin.P15, 0)
-                pins.analogWritePin(AnalogPin.P16, speed)
-            }
-        }
-    }
-
-    //% group="Servo Control"
-    /**
-     * Control Servo Motor 0 - 180 Degrees
-     */
-    //% block="Servo %Servo_Write|Degree %Degree"
-    //% degree.min=0 degree.max=180
-    export function servoWrite(servo: Servo_Write, degree: number): void {
-        if (servo == Servo_Write.P8) {
-            pins.servoWritePin(AnalogPin.P8, degree)
-        }
-        else if (servo == Servo_Write.P12) {
-            pins.servoWritePin(AnalogPin.P12, degree)
-        }
-    }
-
-    //% group="Sensor and ADC"
+//% color="#2ECC71" icon="\uf11b"
+namespace PTJoystickBIT {
     /**
      * Read Analog from ADC Channel
      */
     //% block="ADCRead %ADC_Read"
-    export function ADCRead(ADCRead: ADC_Read): number { 
+    function ADCRead(ADCRead: ADC_Read): number { 
         pins.i2cWriteNumber(0x48, ADCRead, NumberFormat.UInt8LE, false)
         return ADCRead = pins.i2cReadNumber(0x48, NumberFormat.UInt16BE, false)      
     }
-
-    //% group="Sensor and ADC"
+    
+    //% group="Setup Joystick"
     /**
-     * Read Distance from Ultrasonic Sensor
-     */
-    //% block="GETDistance"
-    export function distanceRead(): number {
-        let duration
-
-        pins.digitalWritePin(DigitalPin.P1, 1)
-        basic.pause(1)
-        pins.digitalWritePin(DigitalPin.P1, 0)
-        if (pins.digitalReadPin(DigitalPin.P2) == 0) {
-            pins.digitalWritePin(DigitalPin.P1, 0)
-            pins.digitalWritePin(DigitalPin.P1, 1)
-            pins.digitalWritePin(DigitalPin.P1, 0)
-            duration = pins.pulseIn(DigitalPin.P2, PulseValue.High, 500 * 58)
-        } else {
-            pins.digitalWritePin(DigitalPin.P1, 0)
-            pins.digitalWritePin(DigitalPin.P1, 1)
-            duration = pins.pulseIn(DigitalPin.P2, PulseValue.Low, 500 * 58)
-        }
-
-        let x = duration / 39
-
-        if (x <= 0 || x > 500) {
-            return 0
-        }
-
-        return Math.round(x)
+      * Enable or Disable auto power off (default is enable)
+    */
+    //% block="auto power off %flag"
+    //% flag.shadow="toggleOnOff"
+    export function autoPowerOff(flag: boolean): void {
+        Auto_Power_Off = flag
     }
 
-    //% group="Line Follower"
+    //% group="Setup Joystick"
     /**
-     * Turn Left or Right Follower Line Mode
+     * Initialization joystick
      */
-    //% block="TurnLINE %turn|Speed\n %speed|Sensor %sensor|Fast Time %time"
-    //% speed.min=0 speed.max=100
-    //% time.shadow="timePicker"
-    //% break_delay.shadow="timePicker"
-    //% time.defl=200
-    export function TurnLINE(turn: Turn_Line, speed: number, sensor: number, time: number) {
-        let ADC_PIN = [
-                ADC_Read.ADC0,
-                ADC_Read.ADC1,
-                ADC_Read.ADC2,
-                ADC_Read.ADC3,
-                ADC_Read.ADC4,
-                ADC_Read.ADC5,
-                ADC_Read.ADC6,
-                ADC_Read.ADC7
-            ]
-        let on_line = 0
-        let adc_sensor_pin = sensor - 1
-        let error = 0
-        let motor_speed = 0
-        let motor_slow = 10
-        let timer = control.millis()
+    //% block="initialization joystick"
+    export function Initialization():void {
+        for (let index = 0; index < 2; index++) {
+            pins.analogWritePin(AnalogPin.P16, 1023)
+            basic.pause(50)
+            pins.analogWritePin(AnalogPin.P16, 0)
+            basic.pause(100)
+        }
+        serial.redirect(SerialPin.USB_TX, SerialPin.P14, BaudRate.BaudRate115200)
+        pins.setPull(DigitalPin.P9, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P5, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P7, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P0, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P10, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P11, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P13, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P12, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P8, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P15, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P6, PinPullMode.PullUp)
+        pins.setPull(DigitalPin.P4, PinPullMode.PullUp)
 
-        while (1) {
-            on_line = 0
-            for (let i = 0; i < Sensor_PIN.length; i ++) {
-                if ((pins.map(ADCRead(ADC_PIN[Sensor_PIN[i]]), Color_Line_All[i], Color_Background_All[i], 1000, 0)) >= 500) {
-                    on_line += 1;
+        control.runInParallel(() => {
+            while (true) {
+                Serial_String = serial.readLine().split(",")
+                if (parseFloat(Serial_String[4]) >= 0) {
+                    HOME_Button = parseFloat(Serial_String[0])
+                    UP_Button = parseFloat(Serial_String[1])
+                    DOWN_Button = parseFloat(Serial_String[2])
+                    LEFT_Button = parseFloat(Serial_String[3])
+                    VB_Button = parseFloat(Serial_String[4])
+                }
+
+                if (Auto_Power_Off == true) {
+                    pins.digitalWritePin(DigitalPin.P3, 1)
+                }
+                else {
+                    pins.digitalWritePin(DigitalPin.P3, 0)
+                }
+
+                if (pins.digitalReadPin(DigitalPin.P9) == 0 || pins.digitalReadPin(DigitalPin.P5) == 0 || pins.digitalReadPin(DigitalPin.P7) == 0 || pins.digitalReadPin(DigitalPin.P0) == 0 || UP_Button == 0 || DOWN_Button == 0 || LEFT_Button == 0 || pins.digitalReadPin(DigitalPin.P10) == 0 || pins.digitalReadPin(DigitalPin.P11) == 0 || pins.digitalReadPin(DigitalPin.P13) == 0 || pins.digitalReadPin(DigitalPin.P12) == 0 || pins.digitalReadPin(DigitalPin.P2) == 0 || pins.digitalReadPin(DigitalPin.P1) == 0 || pins.digitalReadPin(DigitalPin.P8) == 0 || pins.digitalReadPin(DigitalPin.P15) == 0 || VB_Button == 0 || HOME_Button == 0 || pins.digitalReadPin(DigitalPin.P6) == 0 || pins.digitalReadPin(DigitalPin.P4) == 0) {
+                    pins.digitalWritePin(DigitalPin.P3, 0)
+                }
+                else {
+                    pins.digitalWritePin(DigitalPin.P3, 1)
                 }
             }
+        })
+    }
 
-            if (on_line == 0) {
-                break
+    //% group="Button Event"
+    /**
+     * Read analog value from jostick
+     */
+    //% block="analog value of %Analog_Hat|axis %Axis"
+    export function readAnalogHat(analog_channel: Analog_Hat, axis: Axis): number {
+        if (analog_channel == Analog_Hat.left) {
+            if (axis == Axis.X) {
+                return ADCRead(ADC_Read.ADC6)
             }
-
-            error = timer - (control.millis() - time)
-            motor_speed = error
-
-            if (motor_speed > 100) {
-                motor_speed = 100
-            }
-            else if (motor_speed < 0) {
-                motor_speed = motor_slow
-            }
-
-            if (turn == Turn_Line.Left) {
-                motorGo(-motor_speed, motor_speed)
-            }
-            else if (turn == Turn_Line.Right) {
-                motorGo(motor_speed, -motor_speed)
-            }
-        }
-        
-        while (1) {
-            if ((pins.map(ADCRead(ADC_PIN[Sensor_All_PIN[adc_sensor_pin]]), Color_Line[adc_sensor_pin], Color_Background[adc_sensor_pin], 1000, 0)) >= 800) {
-                motorStop()
-                break
+            else if (axis == Axis.Y) {
+                return ADCRead(ADC_Read.ADC7)
             }
             else {
-                error = timer - (control.millis() - time)
-                motor_speed = error
-
-                if (motor_speed > 100) {
-                    motor_speed = 100
-                }
-                else if (motor_speed < 0) {
-                    motor_speed = motor_slow
-                }
-
-                if (turn == Turn_Line.Left) {
-                    motorGo(-motor_speed, motor_speed)
-                }
-                else if (turn == Turn_Line.Right) {
-                    motorGo(motor_speed, -motor_speed)
-                }
-            }
-        }
-    }
-
-    //% group="Line Follower"
-    /**
-     * Line Follower Forward Timer
-     */
-    //% block="Time %time|Min Speed %base_speed|Max Speed %max_speed|KP %kp|KD %kd"
-    //% min_speed.min=0 min_speed.max=100
-    //% max_speed.min=0 max_speed.max=100
-    //% time.shadow="timePicker"
-    //% time.defl=200
-    export function ForwardTIME(time: number, min_speed: number, max_speed: number, kp: number, kd: number) {
-        let timer = control.millis()
-
-        while (control.millis() - timer < time) {
-            error = GETPosition() - (((Num_Sensor - 1) * 1000) / 2)
-            P = error
-            D = error - previous_error
-            PD_Value = (kp * P) + (kd * D)
-            previous_error = error
-
-            left_motor_speed = min_speed - PD_Value
-            right_motor_speed = min_speed + PD_Value
-
-            if (left_motor_speed > max_speed) {
-                left_motor_speed = max_speed
-            }
-            else if (left_motor_speed < -max_speed) {
-                left_motor_speed = -max_speed
-            }
-
-            if (right_motor_speed > max_speed) {
-                right_motor_speed = max_speed
-            }
-            else if (right_motor_speed < -max_speed) {
-                right_motor_speed = -max_speed
-            }
-
-            motorGo(left_motor_speed, right_motor_speed)
-        }
-        motorStop()
-    }
-
-    //% group="Line Follower"
-    /**
-     * Line Follower Forward
-     */
-    //% block="Find %Find_Line|Min Speed %base_speed|Max Speed %max_speed|KP %kp|KD %kd"
-    //% min_speed.min=0 min_speed.max=100
-    //% max_speed.min=0 max_speed.max=100
-    //% break_time.shadow="timePicker"
-    //% break_time.defl=20
-    export function ForwardLINE(find: Find_Line, min_speed: number, max_speed: number, kp: number, kd: number) {
-        let ADC_PIN = [
-                ADC_Read.ADC0, 
-                ADC_Read.ADC1,
-                ADC_Read.ADC2, 
-                ADC_Read.ADC3,
-                ADC_Read.ADC4, 
-                ADC_Read.ADC5,
-                ADC_Read.ADC6,
-                ADC_Read.ADC7
-            ]
-        let found_left = 0
-        let found_right = 0
-        let last_left = 0
-        let last_right = 0
-        let line_state = 0
-        let on_line = 0
-        let on_line_LR = 0
-
-        while (1) {
-            found_left = 0
-            found_right = 0
-            on_line = 0
-            on_line_LR = 0
-            for (let i = 0; i < Sensor_PIN.length; i ++) {
-                if ((pins.map(ADCRead(ADC_PIN[Sensor_PIN[i]]), Color_Line[i], Color_Background[i], 1000, 0)) >= 800) {
-                    on_line += 1;
-                }
-            }
-
-            for (let i = 0; i < Sensor_Left.length; i ++) {
-                if ((pins.map(ADCRead(ADC_PIN[Sensor_Left[i]]), Color_Line_Left[i], Color_Background[i], 1000, 0)) >= 800) {
-                    on_line_LR += 1;
-                }
-            }
-
-            for (let i = 0; i < Sensor_Right.length; i ++) {
-                if ((pins.map(ADCRead(ADC_PIN[Sensor_Right[i]]), Color_Line_Right[i], Color_Background[i], 1000, 0)) >= 800) {
-                    on_line_LR += 1;
-                }
-            }
-
-            if (on_line > 0 && on_line <= 2 && on_line_LR == 0) {
-                error = GETPosition() - (((Num_Sensor - 1) * 1000) / 2)
-                P = error
-                D = error - previous_error
-                PD_Value = (kp * P) + (kd * D)
-                previous_error = error
-
-                left_motor_speed = min_speed - PD_Value
-                right_motor_speed = min_speed + PD_Value
-
-                if (left_motor_speed > max_speed) {
-                    left_motor_speed = max_speed
-                }
-                else if (left_motor_speed < -max_speed) {
-                    left_motor_speed = -max_speed
-                }
-
-                if (right_motor_speed > max_speed) {
-                    right_motor_speed = max_speed
-                }
-                else if (right_motor_speed < -max_speed) {
-                    right_motor_speed = -max_speed
-                }
-
-                motorGo(left_motor_speed, right_motor_speed)
-            }
-            else {
-                motorGo(min_speed, min_speed)
-            }
-            
-            if (line_state == 0) {
-                for (let i = 0; i < Sensor_Left.length; i ++) {
-                    if ((pins.map(ADCRead(ADC_PIN[Sensor_Left[i]]), Color_Line_Left[i], Color_Background[i], 1000, 0)) >= 800) {
-                        found_left += 1;
-                    }
-                }
-
-                for (let i = 0; i < Sensor_Right.length; i ++) {
-                    if ((pins.map(ADCRead(ADC_PIN[Sensor_Right[i]]), Color_Line_Right[i], Color_Background[i], 1000, 0)) >= 800) {
-                        found_right += 1;
-                    }
-                }
-
-                if (found_left == Sensor_Left.length || found_right == Sensor_Right.length) {
-                    line_state = 1
-                }
-            }
-            else if (line_state == 1) {
-                for (let i = 0; i < Sensor_Left.length; i ++) {
-                    if ((pins.map(ADCRead(ADC_PIN[Sensor_Left[i]]), Color_Line_Left[i], Color_Background[i], 1000, 0)) >= 800) {
-                        found_left += 1;
-                        if (last_left != Sensor_Left.length) {
-                            last_left = found_left
-                        }
-                    }
-                }
-
-                for (let i = 0; i < Sensor_Right.length; i ++) {
-                    if ((pins.map(ADCRead(ADC_PIN[Sensor_Right[i]]), Color_Line_Right[i], Color_Background[i], 1000, 0)) >= 800) {
-                        found_right += 1;
-                        if (last_right != Sensor_Right.length) {
-                            last_right = found_right
-                        }
-                    }
-                }
-
-                if (found_left != Sensor_Left.length && found_right != Sensor_Right.length) {
-                    line_state = 2
-                }
-            }
-
-            else if (line_state == 2) {
-                if (find == Find_Line.Left) {
-                    if (last_left == Sensor_Left.length && last_right != Sensor_Right.length) {
-                        motorStop()
-                        break
-                    }
-                    else {
-                        last_left = 0
-                        last_right = 0
-                        line_state = 0
-                    }
-                }
-                else if (find == Find_Line.Center) {
-                    if (last_left == Sensor_Left.length && last_right == Sensor_Right.length) {
-                        motorStop()
-                        break
-                    }
-                    else {
-                        last_left = 0
-                        last_right = 0
-                        line_state = 0
-                    }
-                }
-                else if (find == Find_Line.Right) {
-                    if (last_left != Sensor_Left.length && last_right == Sensor_Right.length) {
-                        motorStop()
-                        break
-                    }
-                    else {
-                        last_left = 0
-                        last_right = 0
-                        line_state = 0
-                    }
-                }
-            }
-        }
-    }
-
-    //% group="Line Follower"
-    /**
-     * Basic Line Follower
-     */
-    //% block="Min Speed %base_speed|Max Speed %max_speed|KP %kp|KD %kd"
-    //% min_speed.min=0 min_speed.max=100
-    //% max_speed.min=0 max_speed.max=100
-    export function Follower(min_speed: number, max_speed: number, kp: number, kd: number) {
-        error = GETPosition() - (((Num_Sensor - 1) * 1000) / 2)
-        P = error
-        D = error - previous_error
-        PD_Value = (kp * P) + (kd * D)
-        previous_error = error
-
-        left_motor_speed = min_speed - PD_Value
-        right_motor_speed = min_speed + PD_Value
-
-        if (left_motor_speed > max_speed) {
-            left_motor_speed = max_speed
-        }
-        else if (left_motor_speed < -max_speed) {
-            left_motor_speed = -max_speed
-        }
-
-        if (right_motor_speed > max_speed) {
-            right_motor_speed = max_speed
-        }
-        else if (right_motor_speed < -max_speed) {
-            right_motor_speed = -max_speed
-        }
-
-        motorGo(left_motor_speed, right_motor_speed)
-    }
-
-    //% group="Line Follower"
-    /**
-     * Get Position Line
-     */
-    //% block="GETPosition"
-    export function GETPosition() {
-        let ADC_PIN = [
-                ADC_Read.ADC0, 
-                ADC_Read.ADC1,
-                ADC_Read.ADC2, 
-                ADC_Read.ADC3,
-                ADC_Read.ADC4, 
-                ADC_Read.ADC5,
-                ADC_Read.ADC6,
-                ADC_Read.ADC7
-            ]
-        let Average = 0
-        let Sum_Value = 0
-        let ON_Line = 0
-
-        for (let i = 0; i < Num_Sensor; i ++) {
-            let Value_Sensor = 0;
-            if (Line_Mode == 0) {
-                Value_Sensor = pins.map(ADCRead(ADC_PIN[Sensor_PIN[i]]), Color_Line[i], Color_Background[i], 1000, 0)
-                if (Value_Sensor < 0) {
-                    Value_Sensor = 0
-                }
-                else if (Value_Sensor > 1000) {
-                    Value_Sensor = 1000
-                }
-            }
-            else {
-                Value_Sensor = pins.map(ADCRead(ADC_PIN[Sensor_PIN[i]]), Color_Background[i], Color_Line[i], 1000, 0)
-                if (Value_Sensor < 0) {
-                    Value_Sensor = 0
-                }
-                else if (Value_Sensor > 1000) {
-                    Value_Sensor = 1000
-                }
-            }
-            if (Value_Sensor > 200) {
-                ON_Line = 1;
-                Average += Value_Sensor * (i * 1000)
-                Sum_Value += Value_Sensor
-            }
-        }
-        if (ON_Line == 0){
-            if (Last_Position < (Num_Sensor - 1) * 1000 / 2){
-                return (Num_Sensor - 1) * 1000
-            }
-            else{
                 return 0
             }
         }
-        Last_Position = Average / Sum_Value;
-        return Math.round(((Num_Sensor - 1) * 1000) - Last_Position)
+        else if (analog_channel == Analog_Hat.right) {
+            if (axis == Axis.X) {
+                return ADCRead(ADC_Read.ADC1)
+            }
+            else if (axis == Axis.Y) {
+                return ADCRead(ADC_Read.ADC0)
+            }
+            else {
+                return 0
+            }
+        }
+        else {
+            return 0
+        }
     }
 
-    //% group="Line Follower"
+    //% group="Button Event"
     /**
-     * Calibrate Sensor
+     * Read button value from jostick
      */
-    //% block="SensorCalibrate $adc_pin"
-    export function SensorCalibrate(): void {
-        let ADC_PIN = [ 
-                ADC_Read.ADC0,
-                ADC_Read.ADC1,
-                ADC_Read.ADC2,
-                ADC_Read.ADC3,
-                ADC_Read.ADC4,
-                ADC_Read.ADC5,
-                ADC_Read.ADC6,
-                ADC_Read.ADC7
-            ]
-        let _Sensor_PIN = [0, 1, 2, 3, 4, 5]
-        let _Num_Sensor = _Sensor_PIN.length
-        let Line_Cal = [0, 0, 0, 0, 0, 0, 0, 0]
-        let Background_Cal = [0, 0, 0, 0, 0, 0, 0, 0]
+    //% block="button value of %Button_PIN"
+    export function readButton(button: Button_PIN): number {
+        if (button == Button_PIN.L1) {
+            return pins.digitalReadPin(DigitalPin.P9)
+        }
+        else if (button == Button_PIN.ZL) {
+            return pins.digitalReadPin(DigitalPin.P5)
+        }
+        else if (button == Button_PIN.R1) {
+            return pins.digitalReadPin(DigitalPin.P7)
+        }
+        else if (button == Button_PIN.ZR) {
+            return pins.digitalReadPin(DigitalPin.P0)
+        }
+        else if (button == Button_PIN.UP) {
+            return UP_Button
+        }
+        else if (button == Button_PIN.DOWN) {
+            return DOWN_Button
+        }
+        else if (button == Button_PIN.LEFT) {
+            return LEFT_Button
+        }
+        else if (button == Button_PIN.RIGHT) {
+            return pins.digitalReadPin(DigitalPin.P10)
+        }
+        else if (button == Button_PIN.X) {
+            return pins.digitalReadPin(DigitalPin.P11)
+        }
+        else if (button == Button_PIN.Y) {
+            return pins.digitalReadPin(DigitalPin.P13)
+        }
+        else if (button == Button_PIN.A) {
+            return pins.digitalReadPin(DigitalPin.P12)
+        }
+        else if (button == Button_PIN.B) {
+            return pins.digitalReadPin(DigitalPin.P2)
+        }
+        else if (button == Button_PIN.SEL) {
+            return pins.digitalReadPin(DigitalPin.P1)
+        }
+        else if (button == Button_PIN.STA) {
+            return pins.digitalReadPin(DigitalPin.P8)
+        }
+        else if (button == Button_PIN.TUB) {
+            return pins.digitalReadPin(DigitalPin.P15)
+        }
+        else if (button == Button_PIN.VB) {
+            return VB_Button
+        }
+        else if (button == Button_PIN.HOME) {
+            return HOME_Button
+        }
+        else if (button == Button_PIN.LEFT_HAT) {
+            return pins.digitalReadPin(DigitalPin.P6)
+        }
+        else if (button == Button_PIN.RIGHT_HAT) {
+            return pins.digitalReadPin(DigitalPin.P4)
+        }
+        else {
+            return 0
+        }
+    }
 
-        music.playTone(587, music.beat(BeatFraction.Quarter))
-        music.playTone(784, music.beat(BeatFraction.Quarter))
-        ////Calibrate Follower Line
-        while (!input.buttonIsPressed(Button.A));
-        music.playTone(784, music.beat(BeatFraction.Quarter))
-        for (let i = 0; i < 20; i ++) {
-            for (let j = 0; j < _Num_Sensor; j ++) {
-                Line_Cal[j] += ADCRead(ADC_PIN[_Sensor_PIN[j]])
+    //% group="Button Event"
+    /**
+    * Get button status
+    */
+    //% block="button %button is pressed"
+    export function buttonStatus(button: Button_PIN): boolean {
+        if (button == Button_PIN.L1) {
+            return (pins.digitalReadPin(DigitalPin.P9) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.ZL) {
+            return (pins.digitalReadPin(DigitalPin.P5) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.R1) {
+            return (pins.digitalReadPin(DigitalPin.P7) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.ZR) {
+            return (pins.digitalReadPin(DigitalPin.P0) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.UP) {
+            return (UP_Button == 0 ? true : false)
+        }
+        else if (button == Button_PIN.DOWN) {
+            return (DOWN_Button == 0 ? true : false)
+        }
+        else if (button == Button_PIN.LEFT) {
+            return (LEFT_Button == 0 ? true : false)
+        }
+        else if (button == Button_PIN.RIGHT) {
+            return (pins.digitalReadPin(DigitalPin.P10) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.X) {
+            return (pins.digitalReadPin(DigitalPin.P11) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.Y) {
+            return (pins.digitalReadPin(DigitalPin.P13) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.A) {
+            return (pins.digitalReadPin(DigitalPin.P12) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.B) {
+            return (pins.digitalReadPin(DigitalPin.P2) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.SEL) {
+            return (pins.digitalReadPin(DigitalPin.P1) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.STA) {
+            return (pins.digitalReadPin(DigitalPin.P8) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.TUB) {
+            return (pins.digitalReadPin(DigitalPin.P15) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.VB) {
+            return (VB_Button == 0 ? true : false)
+        }
+        else if (button == Button_PIN.HOME) {
+            return (HOME_Button == 0 ? true : false)
+        }
+        else if (button == Button_PIN.LEFT_HAT) {
+            return (pins.digitalReadPin(DigitalPin.P6) == 0 ? true : false)
+        }
+        else if (button == Button_PIN.RIGHT_HAT) {
+            return (pins.digitalReadPin(DigitalPin.P4) == 0 ? true : false)
+        }
+        else {
+            return false
+        }
+    }
+
+    //% group="Button Event"
+    /**
+    * Get button value is clicked or released
+    */
+    //% block="button %button is %event"
+    export function buttonClicked(button: Button_PIN, event: Button_Type): boolean {
+        if (button == Button_PIN.L1) {
+            if (pins.digitalReadPin(DigitalPin.P9) == 0 && State_Button_L1 == false) {
+                State_Button_L1 = true
+                return (event == Button_Type.clicked ? true : false)
             }
-            basic.pause(50)
-        }
-        for (let i = 0; i < _Num_Sensor; i ++) {
-            Line_Cal[i] = Line_Cal[i] / 20
-            for (let j = 0; j < 8; j ++) {
-                if (_Sensor_PIN[i] == j) {
-                    Line_HIGH[j] = Line_Cal[i]
-                }
+            else if (pins.digitalReadPin(DigitalPin.P9) == 1 && State_Button_L1 == true) {
+                State_Button_L1 = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
             }
         }
-        music.playTone(784, music.beat(BeatFraction.Quarter))
-
-        ////Calibrate Background
-        while (!input.buttonIsPressed(Button.A));
-        music.playTone(784, music.beat(BeatFraction.Quarter))
-        for (let i = 0; i < 20; i ++) {
-            for (let j = 0; j < _Num_Sensor; j ++) {
-                Background_Cal[j] += ADCRead(ADC_PIN[_Sensor_PIN[j]])
+        else if (button == Button_PIN.ZL) {
+            if (pins.digitalReadPin(DigitalPin.P5) == 0 && State_Button_ZL == false) {
+                State_Button_ZL = true
+                return (event == Button_Type.clicked ? true : false)
             }
-            basic.pause(50)
-        }
-        for (let i = 0; i < _Num_Sensor; i ++) {
-            Background_Cal[i] = Background_Cal[i] / 20
-            for (let j = 0; j < 8; j ++) {
-                if (_Sensor_PIN[i] == j) {
-                    Line_LOW[j] = Background_Cal[i]
-                }
+            else if (pins.digitalReadPin(DigitalPin.P5) == 1 && State_Button_ZL == true) {
+                State_Button_ZL = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
             }
         }
-
-        for (let i = 0; i < Num_Sensor; i ++) {
-            Color_Line[i] = Line_HIGH[Sensor_PIN[i]]
-            Color_Background[i] = Line_LOW[Sensor_PIN[i]]
+        else if (button == Button_PIN.R1) {
+            if (pins.digitalReadPin(DigitalPin.P7) == 0 && State_Button_R1 == false) {
+                State_Button_R1 = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P7) == 1 && State_Button_R1 == true) {
+                State_Button_R1 = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
         }
-        for (let i = 0; i < Sensor_Left.length; i ++) {
-            Color_Line_Left[i] = Line_HIGH[Sensor_Left[i]]
-            Color_Background_Left[i] = Line_LOW[Sensor_Left[i]]
+        else if (button == Button_PIN.ZR) {
+            if (pins.digitalReadPin(DigitalPin.P0) == 0 && State_Button_ZR == false) {
+                State_Button_ZR = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P0) == 1 && State_Button_ZR == true) {
+                State_Button_ZR = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
         }
-        for (let i = 0; i < Sensor_Right.length; i ++) {
-            Color_Line_Right[i] = Line_HIGH[Sensor_Right[i]]
-            Color_Background_Right[i] = Line_LOW[Sensor_Right[i]]
+        else if (button == Button_PIN.UP) {
+            if (UP_Button == 0 && State_Button_UP == false) {
+                State_Button_UP = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (UP_Button == 1 && State_Button_UP == true) {
+                State_Button_UP = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
         }
+        else if (button == Button_PIN.DOWN) {
+            if (DOWN_Button == 0 && State_Button_DOWN == false) {
+                State_Button_DOWN = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (DOWN_Button == 1 && State_Button_DOWN == true) {
+                State_Button_DOWN = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.LEFT) {
+            if (LEFT_Button == 0 && State_Button_LEFT == false) {
+                State_Button_LEFT = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (LEFT_Button == 1 && State_Button_LEFT == true) {
+                State_Button_LEFT = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.RIGHT) {
+            if (pins.digitalReadPin(DigitalPin.P10) == 0 && State_Button_RIGHT == false) {
+                State_Button_RIGHT = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P10) == 1 && State_Button_RIGHT == true) {
+                State_Button_RIGHT = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.X) {
+            if (pins.digitalReadPin(DigitalPin.P11) == 0 && State_Button_X == false) {
+                State_Button_X = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P11) == 1 && State_Button_X == true) {
+                State_Button_X = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.Y) {
+            if (pins.digitalReadPin(DigitalPin.P13) == 0 && State_Button_Y == false) {
+                State_Button_Y = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P13) == 1 && State_Button_Y == true) {
+                State_Button_Y = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.A) {
+            if (pins.digitalReadPin(DigitalPin.P12) == 0 && State_Button_A == false) {
+                State_Button_A = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P12) == 1 && State_Button_A == true) {
+                State_Button_A = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.B) {
+            if (pins.digitalReadPin(DigitalPin.P2) == 0 && State_Button_B == false) {
+                State_Button_B = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P2) == 1 && State_Button_B == true) {
+                State_Button_B = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.SEL) {
+            if (pins.digitalReadPin(DigitalPin.P1) == 0 && State_Button_SEL == false) {
+                State_Button_SEL = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P1) == 1 && State_Button_SEL == true) {
+                State_Button_SEL = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.STA) {
+            if (pins.digitalReadPin(DigitalPin.P8) == 0 && State_Button_STA == false) {
+                State_Button_STA = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P8) == 1 && State_Button_STA == true) {
+                State_Button_STA = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.TUB) {
+            if (pins.digitalReadPin(DigitalPin.P15) == 0 && State_Button_TUB == false) {
+                State_Button_TUB = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P15) == 1 && State_Button_TUB == true) {
+                State_Button_TUB = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.VB) {
+            if (VB_Button == 0 && State_Button_VB == false) {
+                State_Button_VB = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (VB_Button == 1 && State_Button_VB == true) {
+                State_Button_VB = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.HOME) {
+            if (HOME_Button == 0 && State_Button_HOME == false) {
+                State_Button_HOME = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (HOME_Button == 1 && State_Button_HOME == true) {
+                State_Button_HOME = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.LEFT_HAT) {
+            if (pins.digitalReadPin(DigitalPin.P6) == 0 && State_Button_LEFT_HAT == false) {
+                State_Button_LEFT_HAT = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P6) == 1 && State_Button_LEFT_HAT == true) {
+                State_Button_LEFT_HAT = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else if (button == Button_PIN.RIGHT_HAT) {
+            if (pins.digitalReadPin(DigitalPin.P4) == 0 && State_Button_RIGHT_HAT == false) {
+                State_Button_RIGHT_HAT = true
+                return (event == Button_Type.clicked ? true : false)
+            }
+            else if (pins.digitalReadPin(DigitalPin.P4) == 1 && State_Button_RIGHT_HAT == true) {
+                State_Button_RIGHT_HAT = false
+                return (event == Button_Type.clicked ? false : true)
+            }
+            else {
+                return false
+            }
+        }
+        else {
+            return false
+        }
+    }
 
-        Color_Line_All = [Color_Line_Left[0], Color_Line[0], Color_Line[1], Color_Line[2], Color_Line[3], Color_Line_Right[0]]
-        Color_Background_All = [Color_Background_Left[0], Color_Background[0], Color_Background[1], Color_Background[2], Color_Background[3], Color_Background_Right[0]]
+    //% group="Motion Sensor"
+    /**
+     * Read acceleration value from jostick
+     */
+    //% block="acceleration of axis %Axis"
+    export function readAcceleration(axis: Axis): number {
+        if (axis == Axis.X) {
+            return -input.acceleration(Dimension.Y)
+        }
+        else if (axis == Axis.Y) {
+            return -input.acceleration(Dimension.X)
+        }
+        else {
+            return 0
+        }
+    }
 
-        music.playTone(784, music.beat(BeatFraction.Quarter))
-        music.playTone(587, music.beat(BeatFraction.Quarter))
+    //% group="Vibration Control"
+    /**
+     * Stop Vibration
+     */
+    //% block="stop vibration"
+    export function stopVibration():void {
+        pins.analogWritePin(AnalogPin.P16, 0)
+    }
+
+    //% group="Vibration Control"
+    /**
+     * Control vibration motor. The vibration level is adjustable between 0 to 100.
+     */
+    //% block="vibration level %_vibration_level"
+    //% vibration_level.min=0 vibration_level.max=100 vibration_level.defl=50
+    export function vibrationMotor(vibration_level: number): void {
+        pins.analogWritePin(AnalogPin.P16, pins.map(vibration_level, 0, 10, 0, 1023))
+    }
+    
+    //% group="Vibration Control"
+    /**
+     * Control vibration motor. The vibration level is adjustable between 1 to 10 and adjustable time.
+     */
+    //% block="vibration level %vibration_level|time %time"
+    //% vibration_level.min=1 vibration_level.max=10 vibration_level.defl=5
+    //% time.shadow="timePicker" time.defl=100
+    export function vibrationMotorTime(vibration_level: number, time: number): void {
+        pins.analogWritePin(AnalogPin.P16, pins.map(vibration_level, 0, 10, 0, 1023))
+        basic.pause(time)
+        pins.analogWritePin(AnalogPin.P16, 0)
     }
 }
