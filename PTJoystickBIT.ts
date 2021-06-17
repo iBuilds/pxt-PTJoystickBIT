@@ -161,6 +161,7 @@ namespace PTJoystickBIT {
         pins.setPull(DigitalPin.P15, PinPullMode.PullUp)
         pins.setPull(DigitalPin.P6, PinPullMode.PullUp)
         pins.setPull(DigitalPin.P4, PinPullMode.PullUp)
+        radio.setTransmitPower(7)
 
         control.runInParallel(() => {
             while (true) {
