@@ -658,7 +658,7 @@ namespace PTJoystickBIT {
      * Control vibration motor. The vibration level is adjustable between 0 to 100.
      */
     //% block="vibration level %_vibration_level"
-    //% vibration_level.min=0 vibration_level.max=100 vibration_level.defl=50
+    //% vibration_level.min=0 vibration_level.max=10 vibration_level.defl=50
     export function vibrationMotor(vibration_level: number): void {
         pins.analogWritePin(AnalogPin.P16, pins.map(vibration_level, 0, 10, 0, 1023))
     }
